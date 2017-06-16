@@ -65,13 +65,16 @@ BPHeader OpenIndex(const std::string& indexName);
 
 void btCreate(const std::string &fileName,int type, int length=-1);
 
-//returns -1 when failed
+//returns -1 when fails
 int btFind(const std::string &fileName,const element &key);
 
 void btInsert(const string &fileName, const element &key, unsigned int offset);
 
+//returns the offset of the deleted record, and -1 if fails
 int btDelete(const string &fileName, const element &key);
 
-//std::set <unsigned int> btFindLess(const string &fileName, const element &key);
+std::set <unsigned int> btFindLess(const string &fileName, const element &key);
+
+std::set <unsigned int> btFindMore(const string &fileName, const element &key);
 
 #endif
