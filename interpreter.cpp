@@ -268,7 +268,7 @@ void ProcessDelete(stringstream& querystream)
             printf("Operation Error\n");
             return ;
         }
-        fitter.addRule(Rule(op,ProcessElement(data)));
+        fitter.addRule(Rule(itemname,op,ProcessElement(data)));
     }
     while(querystream >> And);
     Delete(tablename,fitter);
@@ -337,7 +337,7 @@ void ProcessSelect(stringstream& querystream)
             printf("Operation Error\n");
             return ;
         }
-        fitter.addRule(Rule(op,ProcessElement(data)));
+        fitter.addRule(Rule(itemname,op,ProcessElement(data)));
     }
     while(querystream >> And);
     Select(SelectItem,tablename,fitter);
