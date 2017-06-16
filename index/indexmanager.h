@@ -39,6 +39,12 @@ public:
     int DeleteKey(const int key);
     int DeleteKey(const float key);
     int DeleteKey(const char* key);
+	std::set<unsigned int> FindLessThan(const int key);
+	std::set<unsigned int> FindLessThan(const float key);
+	std::set<unsigned int> FindLessThan(const char* key);
+	std::set<unsigned int> FindMoreThan(const int key);
+	std::set<unsigned int> FindMoreThan(const float key);
+	std::set<unsigned int> FindMoreThan(const char* key);
 
     friend BPHeader CreateIndex(const std::string& indexName, EleType type);
     inline bool IsInt(void){return this->type == INT;};
@@ -64,8 +70,8 @@ int btFind(const std::string &fileName,const element &key);
 
 void btInsert(const string &fileName, const element &key, unsigned int offset);
 
-bool btDelete(const string &fileName, const element &key);
+int btDelete(const string &fileName, const element &key);
 
-// std::set <unsigned int> btFindLess(const string &fileName, const element &key);
+//std::set <unsigned int> btFindLess(const string &fileName, const element &key);
 
 #endif

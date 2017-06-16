@@ -281,6 +281,254 @@ int BPHeader::DeleteKey(const char* key)
 	}
 }
 
+std::set<unsigned int> BPHeader::FindLessThan(const int key)
+{
+	std::set<unsigned int> resSet = std::set<unsigned int>();
+	Block b = bmReadBlock(this->indexName, this->rootOffset);
+	BPIntNode *node = new BPIntNode(b);
+	while (!node->isLeaf())
+	{
+		b = bmReadBlock(this->indexName, node->childOffset[0]);
+		delete node;
+		node = new BPIntNode(b);
+	}
+
+	int ri = 0, k = node->keys[ri];
+	while (k < key)
+	{		
+		resSet.insert(node->childOffset[ri]);
+		ri++;
+		if (ri == node->fanOut - 1)
+		{
+			unsigned int nextOffset = node->childOffset[ri];
+			delete node;
+			if (!nextOffset) break;	//search ends;
+
+			node = new BPIntNode(bmReadBlock(this->indexName, nextOffset));
+			ri = 0;
+		}
+		k = node->keys[ri];
+	}
+
+	return resSet;
+}
+
+std::set<unsigned int> BPHeader::FindLessThan(const float key)
+{
+	std::set<unsigned int> resSet = std::set<unsigned int>();
+	Block b = bmReadBlock(this->indexName, this->rootOffset);
+	BPFloatNode *node = new BPFloatNode(b);
+	while (!node->isLeaf())
+	{
+		b = bmReadBlock(this->indexName, node->childOffset[0]);
+		delete node;
+		node = new BPFloatNode(b);
+	}
+
+	int ri = 0;
+	float k = node->keys[ri];
+	while (k < key)
+	{
+		resSet.insert(node->childOffset[ri]);
+		ri++;
+		if (ri == node->fanOut - 1)
+		{
+			unsigned int nextOffset = node->childOffset[ri];
+			delete node;
+			if (!nextOffset) break;	//search ends;
+
+			node = new BPFloatNode(bmReadBlock(this->indexName, nextOffset));
+			ri = 0;
+		}
+		k = node->keys[ri];
+	}
+
+	return resSet;
+}
+
+std::set<unsigned int> BPHeader::FindLessThan(const char* key)
+{
+	unsigned int length = this->type >> 1;
+	std::set<unsigned int> resSet = std::set<unsigned int>();
+	Block b = bmReadBlock(this->indexName, this->rootOffset);
+	BPStrNode *node = new BPStrNode(b);
+	while (!node->isLeaf())
+	{
+		b = bmReadBlock(this->indexName, node->childOffset[0]);
+		delete node;
+		node = new BPStrNode(b);
+	}
+
+	int ri = 0;
+	//char *k = new char[length];
+	//memcpy(k, node->keys[ri], length);
+	while (strncmp(node->keys[ri], key, length) < 0)		//k < key
+	{
+		resSet.insert(node->childOffset[ri]);
+		ri++;
+		if (ri == node->fanOut - 1)
+		{
+			unsigned int nextOffset = node->childOffset[ri];
+			delete node;
+			if (!nextOffset) break;	//search ends;
+
+			node = new BPStrNode(bmReadBlock(this->indexName, nextOffset));
+			ri = 0;
+		}
+		//memcpy(k, node->keys[ri], length);
+	}
+	return resSet;
+}
+
+std::set<unsigned int> BPHeader::FindMoreThan(const int key)
+{
+	std::set<unsigned int> resSet = std::set<unsigned int>();
+	Block b = bmReadBlock(this->indexName, this->rootOffset);
+	BPIntNode *node = new BPIntNode(b);
+	while (!node->isLeaf())
+	{
+		int begin = 0, end = node->fanOut - 2;
+		while (begin < end)
+		{
+			int mid = (begin + end + 1) >> 1;
+			if (node->keys[mid] <= key) begin = mid;
+			else end = mid - 1;
+		}
+		if (node->keys[begin] <= key) b = bmReadBlock(this->indexName, node->childOffset[begin + 1]);
+		else b = bmReadBlock(this->indexName, node->childOffset[begin]);
+		delete node;
+		node = new BPIntNode(b);
+	}
+
+	int begin = 0, end = node->fanOut - 2;
+	while (begin < end)
+	{
+		int mid = (begin + end) >> 1;
+		if (node->keys[mid] < key)begin = mid + 1;
+		else end = mid;
+	}
+	
+	int ri = begin;
+	while (1)
+	{
+		resSet.insert(node->childOffset[ri++]);
+		if (ri == node->fanOut - 1)
+		{
+			unsigned int nextOffset = node->childOffset[ri];
+			delete node;
+
+			if (!nextOffset) break;	//search ends
+			else
+			{
+				b = bmReadBlock(this->indexName, nextOffset);
+				node = new BPIntNode(b);
+				ri = 0;
+			}
+		}
+	}
+	return resSet;
+}
+
+std::set<unsigned int> BPHeader::FindMoreThan(const float key)
+{
+	std::set<unsigned int> resSet = std::set<unsigned int>();
+	Block b = bmReadBlock(this->indexName, this->rootOffset);
+	BPFloatNode *node = new BPFloatNode(b);
+	while (!node->isLeaf())
+	{
+		int begin = 0, end = node->fanOut - 2;
+		while (begin < end)
+		{
+			int mid = (begin + end + 1) >> 1;
+			if (node->keys[mid] <= key) begin = mid;
+			else end = mid - 1;
+		}
+		if (node->keys[begin] <= key) b = bmReadBlock(this->indexName, node->childOffset[begin + 1]);
+		else b = bmReadBlock(this->indexName, node->childOffset[begin]);
+		delete node;
+		node = new BPFloatNode(b);
+	}
+
+	int begin = 0, end = node->fanOut - 2;
+	while (begin < end)
+	{
+		int mid = (begin + end) >> 1;
+		if (node->keys[mid] < key)begin = mid + 1;
+		else end = mid;
+	}
+
+	int ri = begin;
+	while (1)
+	{
+		resSet.insert(node->childOffset[ri++]);
+		if (ri == node->fanOut - 1)
+		{
+			unsigned int nextOffset = node->childOffset[ri];
+			delete node;
+
+			if (!nextOffset) break;	//search ends
+			else
+			{
+				b = bmReadBlock(this->indexName, nextOffset);
+				node = new BPFloatNode(b);
+				ri = 0;
+			}
+		}
+	}
+	return resSet;
+}
+
+std::set<unsigned int> BPHeader::FindMoreThan(const char * key)
+{
+	unsigned int length = this->type >> 1;
+	std::set<unsigned int> resSet = std::set<unsigned int>();
+	Block b = bmReadBlock(this->indexName, this->rootOffset);
+	BPStrNode *node = new BPStrNode(b);
+	while (!node->isLeaf())
+	{
+		int begin = 0, end = node->fanOut - 2;
+		while (begin < end)
+		{
+			int mid = (begin + end + 1) >> 1;
+			if (strncmp(node->keys[mid], key, length) <= 0) begin = mid;		//node->keys[mid] <= key
+			else end = mid - 1;
+		}
+		//node->keys[begin] <= key
+		if (strncmp(node->keys[begin], key, length) <= 0) b = bmReadBlock(this->indexName, node->childOffset[begin + 1]);
+		else b = bmReadBlock(this->indexName, node->childOffset[begin]);
+		delete node;
+		node = new BPStrNode(b);
+	}
+
+	int begin = 0, end = node->fanOut - 2;
+	while (begin < end)
+	{
+		int mid = (begin + end) >> 1;
+		if (strncmp(node->keys[mid], key, length) < 0)begin = mid + 1;		//node->keys[mid] < key
+		else end = mid;
+	}
+
+	int ri = begin;
+	while (1)
+	{
+		resSet.insert(node->childOffset[ri++]);
+		if (ri == node->fanOut - 1)
+		{
+			unsigned int nextOffset = node->childOffset[ri];
+			delete node;
+
+			if (!nextOffset) break;	//search ends
+			else
+			{
+				b = bmReadBlock(this->indexName, nextOffset);
+				node = new BPStrNode(b);
+				ri = 0;
+			}
+		}
+	}
+	return resSet;
+}
+
 BPHeader OpenIndex(const std::string& indexName)
 {
 #ifndef _MY_RELEASE
@@ -327,14 +575,14 @@ void btInsert(const string &fileName, const element &key, unsigned int offset){
     }
 }
 
-bool btDelete(const string &fileName, const element &key){
-//     BPHeader h = OpenIndex(fileName);
-//     if(key.type == INT)
-//         return h.DeleteKey(key.datai);
-//     else if(key.type == FLOAT)
-//         return h.DeleteKey(key.dataf);
-//     else{
-//         return h.DeleteKey(key.datas.c_str());
-//     }
+int btDelete(const string &fileName, const element &key){
+     BPHeader h = OpenIndex(fileName);
+     if(key.type == INT)
+         return h.DeleteKey(key.datai);
+     else if(key.type == FLOAT)
+         return h.DeleteKey(key.dataf);
+     else{
+         return h.DeleteKey(key.datas.c_str());
+     }
     return false;
 }

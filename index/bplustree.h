@@ -40,7 +40,7 @@ struct BPNode
 	virtual int DeleteKey(const float key) { return -1; }
 	virtual int DeleteKey(const char* key) { return -1; }
     inline bool isLeaf(void) {return this->head & 1;}
-    inline bool isRoot(void) {return this->head & 2;}
+    inline bool isRoot(void) {return (this->head & 2) != 0;}
     inline unsigned int EleType(void){return this->head >> 2;}
 
     BPNode(unsigned int offset, NodeType head, const string& indexName);
