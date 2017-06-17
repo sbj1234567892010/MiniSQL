@@ -586,3 +586,21 @@ int btDelete(const string &fileName, const element &key){
      }
     return false;
 }
+
+std::set <unsigned int> btFindLess(const string &fileName, const element &key){
+	BPHeader h = OpenIndex(fileName);
+	if(key.type == INT)
+		return h.FindLessThan(key.datai);
+	else if(key.type == FLOAT)
+		return h.FindLessThan(key.dataf);
+	else return h.FindLessThan(key.datas.c_str());
+}
+
+std::set <unsigned int> btFindMore(const string &fileName, const element &key){
+	BPHeader h = OpenIndex(fileName);
+	if(key.type == INT)
+		return h.FindMoreThan(key.datai);
+	else if(key.type == FLOAT)
+		return h.FindMoreThan(key.dataf);
+	else return h.FindMoreThan(key.datas.c_str());
+}
