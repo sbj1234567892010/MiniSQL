@@ -223,7 +223,7 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 
 	//È«²¿²éÑ¯
 	if (fitter.rules.size() == 0) {
-		//return rmSelectWithoutIndex(dbname, fitter, nowtable);
+
 		ret = rmSelectWithoutIndex(dbname, fitter, nowtable);
 		if (SelectItem[0] == "*");
 		else {
@@ -463,6 +463,8 @@ void Delete(const string &tableName, const Fitter &fitter)
 	for (set <int>::iterator it = offset.begin(); it != offset.end(); it++) {
 		rmDeleteWithIndex(tableName + ".db", *it, fitter, nowtable);
 	}
+
+	cout << "Delete succeed!" << endl;
 	return ;
 
 }
@@ -483,17 +485,16 @@ void Insert(const string& tableName, vector<element> entry)
 		return;
 	}
 
+	////ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½â£¬ï¿½ï¿½intï¿½ï¿½ï¿½ï¿½floatï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½
 	for (unsigned int i = 0; i<nowtable.items.size(); i++) {
 		if (nowtable.items[i].type != entry[i].type) {
-            if (nowtable.items[i].type ==  1 &&  entry[i].type == 0 )
-            {
-                entry[i].type = 1;
-                entry[i].dataf = entry[i].datai;
-            }
-            else{
-                cout << "Type mismatch" << endl;
-                return;
-            }
+			if (nowtable.items[i].type == 1 && entry[i].type == 0) {
+				entry[i].type = 1;
+				entry[i].dataf = entry[i].datai;
+				continue;
+			}
+			cout << "Type mismatch" << endl;
+			return;
 		}
 	}
 

@@ -12,7 +12,7 @@ int main()
     while(1)
     {
         cout << "Minisql>>";
-        gets(line);
+        gets_s(line);
         LinetoQuery(line);
     }
     return 0;

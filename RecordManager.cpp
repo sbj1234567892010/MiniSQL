@@ -40,8 +40,11 @@ bool fitInTable(const vector<element> &entry, const table &datatable) {
 
 	//依次检测属性类型是否匹配
 	for (int i = 0; i<entry.size(); i++) {
-		if (entry[i].type != datatable.items[i].type)
+		if (entry[i].type != datatable.items[i].type) {
+
 			return false;
+		}
+			
 	}
 	return true;
 }
