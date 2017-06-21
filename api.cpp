@@ -245,7 +245,7 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 
 	set<int> offset = rmGetAllOffsets(tableName + ".db");
 
-	/*for (int i = 0; i<fitter.rules.size(); i++) {
+	for (int i = 0; i<fitter.rules.size(); i++) {
 		Rule rule = fitter.rules[i];
 
 		temp = fitter.rules[i].itemname;
@@ -277,7 +277,7 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 		for (vector<int>::iterator it = tmp.begin(); it != end; it++) {
 			offset.insert(*it);
 		}
-	}*/
+	}
 
 	vector <vector <element> > res;
 	for (set <int>::iterator it = offset.begin(); it != offset.end(); it++) {
