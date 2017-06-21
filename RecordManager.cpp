@@ -267,7 +267,10 @@ void rmAddIndex(const string dbName, const string BTreeName, const table &datata
 			if (block.data[i]) {
 				vector <element> entry = binaryToEntry(c, datatable);
 				assert(itemIndex<entry.size());
-				assert(btFind(BTreeName, entry[itemIndex]) !=-1);
+				if (btFind(BTreeName, entry[itemIndex]) != -1)
+				{
+					assert(false);
+				}
 				btInsert(BTreeName, entry[itemIndex], offset);
 			}
 			c += datatable.entrySize;
