@@ -91,7 +91,10 @@ BPFloatNode::BPFloatNode(unsigned int nodeOffset, NodeType head, const string& i
 
 BPStrNode::BPStrNode(Block &b):BPNode(b)
 {
-	assert(this->head >> 2 != INT && this->head >> 2 != FLOAT);
+	if (this->head >> 2 == INT || this->head >> 2 == FLOAT)
+	{
+		assert(false);
+	}
     unsigned char* data = b.data;
     unsigned int offset = (sizeof(this->offset) + sizeof(head) + sizeof(fanOut)\
                           + N * sizeof(*childOffset) ) / sizeof(unsigned char);
@@ -183,7 +186,7 @@ void BPStrNode::WriteNode()
 
     unsigned int offset = 0;
     unsigned char* data = b.data;
-    unsigned int length = (head >> 2) / sizeof(unsigned char);
+    unsigned int length = (head >> 3) / sizeof(char);
 
     // memcpy(data + offset, &(this->offset), sizeof(this->offset));
     // offset += sizeof(this->offset) / sizeof(unsigned char);
