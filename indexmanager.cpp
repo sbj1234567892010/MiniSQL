@@ -426,7 +426,9 @@ std::set<unsigned int> BPHeader::FindMoreThan(const int key)
 	int ri = begin;
 	while (1)
 	{
-		resSet.insert(node->childOffset[ri++]);
+		if(node->keys[ri] > key)
+			resSet.insert(node->childOffset[ri]);
+		ri++;
 		if (ri == node->fanOut - 1)
 		{
 			unsigned int nextOffset = node->childOffset[ri];
@@ -479,7 +481,9 @@ std::set<unsigned int> BPHeader::FindMoreThan(const float key)
 	int ri = begin;
 	while (1)
 	{
-		resSet.insert(node->childOffset[ri++]);
+		if (node->keys[ri] > key)
+			resSet.insert(node->childOffset[ri]);
+		ri++;
 		if (ri == node->fanOut - 1)
 		{
 			unsigned int nextOffset = node->childOffset[ri];
@@ -534,7 +538,9 @@ std::set<unsigned int> BPHeader::FindMoreThan(const char * key)
 	int ri = begin;
 	while (1)
 	{
-		resSet.insert(node->childOffset[ri++]);
+		if (strncmp(node->keys[ri], key, length) > 0)
+			resSet.insert(node->childOffset[ri]);
+		ri++;
 		if (ri == node->fanOut - 1)
 		{
 			unsigned int nextOffset = node->childOffset[ri];

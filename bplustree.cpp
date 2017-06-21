@@ -183,7 +183,7 @@ void BPStrNode::WriteNode()
 
     unsigned int offset = 0;
     unsigned char* data = b.data;
-    unsigned int length = (head >> 2) / sizeof(unsigned char);
+    unsigned int length = (head >> 3) / sizeof(char);
 
     // memcpy(data + offset, &(this->offset), sizeof(this->offset));
     // offset += sizeof(this->offset) / sizeof(unsigned char);
