@@ -15,6 +15,22 @@ struct FileStatus {
 //¿é×´Ì¬ 
 map <string, map <int, int> >  blockStatus;
 
+class blockStatusSaver {
+public:
+	~blockStatusSaver() {
+		for (map <string, map<int, int> >::iterator it = blockStatus.begin(); it != blockStatus.end(); it++) {
+			string fileName = it->first;
+			FILE *fp = fopen((fileName + ".blockinfo").c_str(), "w");
+			assert(fp);
+			for (map<int, int>::iterator i = blockStatus[fileName].begin(); i != blockStatus[fileName].end(); i++) {
+				fprintf(fp, "%d %d\n", i->first, i->second);
+			}
+			fclose(fp);
+		}
+	}
+}bss;
+
+
 
 //ÀàÐÍ¼ì²â
 bool fitInTable(const vector<element> &entry, const table &datatable) {

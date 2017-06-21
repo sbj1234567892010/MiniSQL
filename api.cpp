@@ -138,7 +138,7 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 				if (printtable.items[i].name == SelectItem[j]) {
 					exi = 1; break;
 				}
-					
+
 			}
 
 			if (exi == 0) {
@@ -178,7 +178,7 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 	vector <vector <element> > ret;
 
 
-	// 等于情况的查询
+	 /*等于情况的查询*/
 	for (int i = 0; i<fitter.rules.size(); i++) {
 		if (fitter.rules[i].type == 2) {  // 等于情况的查询
 			element rhs = fitter.rules[i].rhs;
@@ -232,7 +232,7 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 					for (int j = 0; j < ret.size(); j++) {
 						ret[j].erase(ret[j].begin() + i);
 					}
-					
+
 					cutlist.erase(cutlist.begin() + i);
 					i--;
 				}
@@ -353,7 +353,7 @@ vector <vector <element> >  Select_Test(const string &tableName, const Fitter &f
 				string btreename = tableName + "." + nowtable.items[index].name + ".index";
 				int offset = btFind(btreename, rhs);
 				return rmSelectWithIndex(dbname, offset, fitter, nowtable);
-				
+
 			}
 
 		}
@@ -396,7 +396,7 @@ void Delete(const string &tableName, const Fitter &fitter)
 			return;
 		}
 	}
-	
+
 	//等于情况删除
 	for (int i = 0; i<fitter.rules.size(); i++) {
 		if (fitter.rules[i].type == 2) {
@@ -469,7 +469,7 @@ void Delete(const string &tableName, const Fitter &fitter)
 
 
 
-void Insert(const string& tableName, const vector<element> entry)
+void Insert(const string& tableName, vector<element> entry)
 {
 	if (!cmExistTable(tableName + ".table")) {
 		cout << "No such table" << endl;
@@ -485,8 +485,15 @@ void Insert(const string& tableName, const vector<element> entry)
 
 	for (unsigned int i = 0; i<nowtable.items.size(); i++) {
 		if (nowtable.items[i].type != entry[i].type) {
-			cout << "Type mismatch" << endl;
-			return;
+            if (nowtable.items[i].type ==  1 &&  entry[i].type == 0 )
+            {
+                entry[i].type = 1;
+                entry[i].dataf = entry[i].datai;
+            }
+            else{
+                cout << "Type mismatch" << endl;
+                return;
+            }
 		}
 	}
 

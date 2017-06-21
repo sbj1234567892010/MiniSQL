@@ -17,7 +17,7 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 vector <vector <element> >  Select_Test(const string &tableName, const Fitter &fitter);
 
 void Delete(const string& tableName, const Fitter &fitter);
-void Insert(const string& tableName, const vector<element> entry);
+void Insert(const string& tableName, vector<element> entry);
 
 void DrawResult(const table &nowtable, vector <vector <element> > &result);
 

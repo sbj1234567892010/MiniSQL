@@ -38,7 +38,7 @@ void InterpretQuery(string query)
 			query.insert(i + 2, " ");
 			i += 2;
 		}
-		else if ((query[i] == '>' && query[i + 1] != '=') || (query[i] == '<' && query[i + 1] != '='))//  >  <
+		else if ((query[i] == '>' && query[i + 1] != '=') || (query[i] == '<' && query[i + 1] != '=' && query[i + 1] != '>'))//  >  <
 		{
 			query.insert(i, " ");
 			query.insert(i + 2, " ");
