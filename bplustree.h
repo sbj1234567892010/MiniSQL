@@ -80,7 +80,7 @@ struct BPStrNode : public BPNode
 
     BPStrNode(Block&);
     virtual ~BPStrNode() {
-        for(unsigned int i = 0; i < fanOut; i++) 
+        for(unsigned int i = 0; i < fanOut - 1; i++) 
             delete[] keys[i];
         delete[] keys;
     }

@@ -116,7 +116,7 @@ void DropTable(const string &tableName)
 
 
 
-int Select(vector <string> SelectItem,const string &tableName, const Fitter &fitter)
+int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
 {
     //cout << "Select Succeed!" << endl;
 	if (!cmExistTable(tableName + ".table")) {
@@ -171,6 +171,11 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 		}
 
 		if (nowtable.items[ind].type != rhs.type) {
+			if (nowtable.items[i].type == 1 && rhs.type == 0) {
+				fitter.rules[i].rhs.type = 1;
+				fitter.rules[i].rhs.dataf = fitter.rules[i].rhs.datai;
+				continue;
+			}
 			cout << "Type mismatch!" << endl;
 			return 0;
 		}
@@ -365,7 +370,7 @@ vector <vector <element> >  Select_Test(const string &tableName, const Fitter &f
 }
 
 
-void Delete(const string &tableName, const Fitter &fitter)
+void Delete(const string &tableName, Fitter &fitter)
 {
     //cout << "Delete Succeed!" << endl;
 	if (!cmExistTable(tableName + ".table")) {
@@ -393,6 +398,11 @@ void Delete(const string &tableName, const Fitter &fitter)
 		}
 
 		if (nowtable.items[ind].type != rhs.type) {
+			if (nowtable.items[i].type == 1 && rhs.type == 0) {
+				fitter.rules[i].rhs.type = 1;
+				fitter.rules[i].rhs.dataf = fitter.rules[i].rhs.datai;
+				continue;
+			}
 			cout << "Type mismatch!" << endl;
 			return;
 		}
