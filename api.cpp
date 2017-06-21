@@ -25,6 +25,7 @@ void CreateIndex(Index& index)
 	for (int i = 0; i<nowtable.items.size(); i++) {
 		if (nowtable.items[i].name == index.attr_name) {
 			itemIndex = i;
+			break;
 		}
 	}
 
@@ -115,7 +116,7 @@ void DropTable(const string &tableName)
 
 
 
-int Select(vector <string> SelectItem,const string &tableName, const Fitter &fitter)
+int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
 {
     //cout << "Select Succeed!" << endl;
 	if (!cmExistTable(tableName + ".table")) {
@@ -170,6 +171,11 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 		}
 
 		if (nowtable.items[ind].type != rhs.type) {
+			if (nowtable.items[i].type == 1 && rhs.type == 0) {
+				fitter.rules[i].rhs.type = 1;
+				fitter.rules[i].rhs.dataf = fitter.rules[i].rhs.datai;
+				continue;
+			}
 			cout << "Type mismatch!" << endl;
 			return 0;
 		}
@@ -247,7 +253,7 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 
 	for (int i = 0; i<fitter.rules.size(); i++) {
 		Rule rule = fitter.rules[i];
-
+		if (rule.type == 5) continue;
 		temp = fitter.rules[i].itemname;
 		for (int i = 0; i<nowtable.items.size(); i++) {
 			if (nowtable.items[i].name == temp) {
@@ -364,7 +370,7 @@ vector <vector <element> >  Select_Test(const string &tableName, const Fitter &f
 }
 
 
-void Delete(const string &tableName, const Fitter &fitter)
+void Delete(const string &tableName, Fitter &fitter)
 {
     //cout << "Delete Succeed!" << endl;
 	if (!cmExistTable(tableName + ".table")) {
@@ -392,6 +398,11 @@ void Delete(const string &tableName, const Fitter &fitter)
 		}
 
 		if (nowtable.items[ind].type != rhs.type) {
+			if (nowtable.items[i].type == 1 && rhs.type == 0) {
+				fitter.rules[i].rhs.type = 1;
+				fitter.rules[i].rhs.dataf = fitter.rules[i].rhs.datai;
+				continue;
+			}
 			cout << "Type mismatch!" << endl;
 			return;
 		}
@@ -415,6 +426,7 @@ void Delete(const string &tableName, const Fitter &fitter)
 				int offset = btFind(btreename, rhs);
 				if (offset == -1)offset = 0;
 				rmDeleteWithIndex(dbname, offset, fitter, nowtable);
+				cout << "Delete Succeed!" << endl;
 				return ;
 			}
 		}
@@ -423,13 +435,14 @@ void Delete(const string &tableName, const Fitter &fitter)
 
 	if (fitter.rules.size() == 0) {
 		rmDeleteWithoutIndex(dbname, fitter, nowtable);
+		cout << "Delete Succeed!" << endl;
 		return ;
 	}
 
 	set<int> offset = rmGetAllOffsets(tableName + ".db");
 	for (int i = 0; i<fitter.rules.size(); i++) {
 		Rule rule = fitter.rules[i];
-
+		if (rule.type == 5)continue;
 		temp = fitter.rules[i].itemname;
 		for (int i = 0; i<nowtable.items.size(); i++) {
 			if (nowtable.items[i].name == temp) {

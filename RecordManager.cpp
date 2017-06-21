@@ -203,6 +203,17 @@ void rmDeleteWithoutIndex(const string fileName, const Fitter &fitter, const tab
 
 				//·ûºÏÉ¾³ıÌõ¼ş
 				if (fitter.test(datatable,entry)) {
+					for (int j = 0; j<datatable.items.size(); j++) {
+						if (datatable.items[j].indices.size()) {
+							string tablename = datatable.name;
+							while (*(tablename.end() - 1) != '.')
+								tablename.erase(tablename.end() - 1);
+							tablename.erase(tablename.end() - 1);
+							string btreename = tablename + "." + datatable.items[j].name + ".index";
+							assert(btFind(btreename, entry[j]) != -1);
+							btDelete(btreename, entry[j]);
+						}
+					}
 
 					block.data[i] = false;
 					blockStatus[fileName][offset]--;
