@@ -25,6 +25,7 @@ void CreateIndex(Index& index)
 	for (int i = 0; i<nowtable.items.size(); i++) {
 		if (nowtable.items[i].name == index.attr_name) {
 			itemIndex = i;
+			break;
 		}
 	}
 
@@ -247,7 +248,7 @@ int Select(vector <string> SelectItem,const string &tableName, const Fitter &fit
 
 	for (int i = 0; i<fitter.rules.size(); i++) {
 		Rule rule = fitter.rules[i];
-
+		if (rule.type == 5) continue;
 		temp = fitter.rules[i].itemname;
 		for (int i = 0; i<nowtable.items.size(); i++) {
 			if (nowtable.items[i].name == temp) {
@@ -429,7 +430,7 @@ void Delete(const string &tableName, const Fitter &fitter)
 	set<int> offset = rmGetAllOffsets(tableName + ".db");
 	for (int i = 0; i<fitter.rules.size(); i++) {
 		Rule rule = fitter.rules[i];
-
+		if (rule.type == 5)continue;
 		temp = fitter.rules[i].itemname;
 		for (int i = 0; i<nowtable.items.size(); i++) {
 			if (nowtable.items[i].name == temp) {
