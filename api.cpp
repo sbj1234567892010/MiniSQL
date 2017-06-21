@@ -426,6 +426,7 @@ void Delete(const string &tableName, Fitter &fitter)
 				int offset = btFind(btreename, rhs);
 				if (offset == -1)offset = 0;
 				rmDeleteWithIndex(dbname, offset, fitter, nowtable);
+				cout << "Delete Succeed!" << endl;
 				return ;
 			}
 		}
@@ -434,6 +435,7 @@ void Delete(const string &tableName, Fitter &fitter)
 
 	if (fitter.rules.size() == 0) {
 		rmDeleteWithoutIndex(dbname, fitter, nowtable);
+		cout << "Delete Succeed!" << endl;
 		return ;
 	}
 
