@@ -48,11 +48,12 @@ public :
 
 class Rule {
 public:
-	int index;
+	//int index;
+	string itemname;
 	int type; // 0: < 1: <= 2: = 3: >= 4: > 5: <>
 	element rhs;
 	Rule(int type, element rhs);
-	Rule(int index,int type,element rhs);
+	Rule(string itemname,int type,element rhs);
 };
 
 class Fitter {
@@ -60,7 +61,7 @@ public:
 	vector <Rule> rules;
 	Fitter();
 	void addRule(const Rule &rule);
-	bool test(const vector <element> &data) const;
+	bool test(const table &nowtable,const vector <element> &data) const;
 };
 
 struct Index

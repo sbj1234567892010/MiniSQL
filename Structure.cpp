@@ -99,9 +99,9 @@ void element::	 print() {
 
 /***********   Rule   ***********/
 Rule::Rule(int type, element rhs):type(type),rhs(rhs){
-    this->index = 0;
+    this->itemname = "";
 }
-Rule::Rule(int index,int type,element rhs):index(index),type(type),rhs(rhs) {
+Rule::Rule(string itemname,int type,element rhs): itemname(itemname),type(type),rhs(rhs) {
 
 }
 
@@ -114,10 +114,26 @@ void Fitter::addRule(const Rule &rule) {
 	rules.push_back(rule);
 }
 
-bool Fitter::test(const vector <element> &data) const{
+bool Fitter::test(const table &nowtable,const vector <element> &data) const{
+	
+	string temp;
+	int index;
+
 	for (int i=0;i<rules.size();i++) {
-		int index=rules[i].index;
+
+		//fitter有一个rules集合
+		//int index=rules[i].index;
+
+		temp = rules[i].itemname;//准备将名字翻译为下标
+		for (int i = 0; i<nowtable.items.size(); i++) {
+			if (nowtable.items[i].name == temp) {
+				index = i;
+				break;
+			}
+		}
+
 		assert(index<data.size());
+
 		switch (rules[i].type) {
 		case 0:if (!(data[index]<rules[i].rhs)) return false;break;
 		case 1:if (!(data[index]<=rules[i].rhs)) return false;break;

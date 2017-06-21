@@ -1,5 +1,6 @@
 #include<iostream>
 #include<cstdio>
+#include <string>
 #include "interpreter.h"
 using namespace std;
 
@@ -11,7 +12,7 @@ int main()
     while(1)
     {
         cout << "Minisql>>";
-        gets(line);
+        gets_s(line);
         LinetoQuery(line);
     }
     return 0;
