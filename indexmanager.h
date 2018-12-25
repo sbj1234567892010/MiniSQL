@@ -73,8 +73,6 @@ void btInsert(const string &fileName, const element &key, unsigned int offset);
 //returns the offset of the deleted record, and -1 if fails
 int btDelete(const string &fileName, const element &key);
 
-void btDrop(const string &fileName);
-
 std::set <unsigned int> btFindLess(const string &fileName, const element &key);
 
 std::set <unsigned int> btFindMore(const string &fileName, const element &key);

@@ -7,7 +7,7 @@
 const int MAX_N (4);
 
 typedef unsigned int NodeType;
-const NodeType ROOT = 2; 
+const NodeType ROOT = 2;
 // const NodeType ITN = 0; //internal node
 const NodeType LEAF = 1;
 
@@ -26,7 +26,7 @@ struct BPNode
     const string indexName;
 
     unsigned int N;
-    
+
     BPNode(Block &b);
     virtual ~BPNode() { delete[] childOffset; }
     virtual void WriteNode() = 0;
@@ -50,7 +50,7 @@ struct BPIntNode : public BPNode
 {
     int *keys;
 
-    BPIntNode(Block&);
+    BPIntNode(Block);//BPIntNode(Block&);
     virtual ~BPIntNode() {delete[] keys;}
     virtual void WriteNode();
     virtual int FindKey(const int key);
@@ -80,7 +80,7 @@ struct BPStrNode : public BPNode
 
     BPStrNode(Block&);
     virtual ~BPStrNode() {
-        for(unsigned int i = 0; i < fanOut - 1; i++) 
+        for(unsigned int i = 0; i < fanOut; i++)
             delete[] keys[i];
         delete[] keys;
     }

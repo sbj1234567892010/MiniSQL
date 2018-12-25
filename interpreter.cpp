@@ -4,9 +4,11 @@
 #include<cstring>
 #include<cstdio>
 #include<sstream>
-#include<ctime>
 #include "interpreter.h"
 #include "api.h"
+//#include "table.h"
+//#include "interface.h"
+//#include "catalogmanager.h"
 
 using namespace std;
 
@@ -39,24 +41,24 @@ void InterpretQuery(string query)
 			query.insert(i + 2, " ");
 			i += 2;
 		}
-		else if ((query[i] == '>' && query[i + 1] != '=') || (query[i] == '<' && query[i + 1] != '=' && query[i + 1] != '>'))//  >  <
+		else if ( (query[i] == '>' && query[i+1] != '=') || (query[i] == '<' && query[i+1] != '=') )//  >  <
 		{
 			query.insert(i, " ");
 			query.insert(i + 2, " ");
 			i += 2;
 		}
-		else if ((query[i] == '>' && query[i + 1] == '=') || (query[i] == '<' && query[i + 1] == '=') || (query[i] == '<' && query[i + 1] == '>'))//  >=  <= <>
+		else if ( (query[i] == '>' && query[i+1] == '=') || (query[i] == '<' && query[i+1] == '=') || (query[i] == '<' && query[i+1] == '>'))//  >=  <= <>
 		{
 			query.insert(i, " ");
 			query.insert(i + 3, " ");
 			i += 3;
 		}
 		else if (query[i] == '=')
-		{
-			query.insert(i, " ");
+        {
+            query.insert(i, " ");
 			query.insert(i + 2, " ");
 			i += 2;
-		}
+        }
 	}
 	stringstream querystream;
 	querystream << query;
@@ -258,18 +260,13 @@ void ProcessDelete(stringstream& querystream)
 	string tablename;
 	string from;
 	string where;
-	querystream >> from >> tablename ;
-	if (from != "from")
+	querystream >> from >> tablename >> where;
+	if (from != "from" || where != "where")
 	{
 		cout << "Syntax Error!" << endl;
 		return;
 	}
 	Fitter fitter;
-	if (!(querystream >> where))// no where clause
-	{
-		Delete(tablename, fitter);
-		return;
-	}
 	string And;
 	do {
 		string itemname;
@@ -277,7 +274,6 @@ void ProcessDelete(stringstream& querystream)
 		string data;
 		querystream >> itemname >> oper >> data;
 		int op;
-		cout << oper << endl;
 		if (oper == "<") {
 			op = 0;
 		}
@@ -404,9 +400,6 @@ void ProcessExecfile(stringstream& querystream)
 	querystream >> filename;
 	cout << filename << endl;
 	FILE *fp = fopen(filename.c_str(), "r");
-	long start, stop;
-	start = clock();
-	//double CalculateTime(long start, long stop);
 	if (!fp)
 		printf("no such file\n");
 	else {
@@ -419,8 +412,6 @@ void ProcessExecfile(stringstream& querystream)
 			ExecfileLinetoQuery(line);
 		}
 	}
-	stop = clock();
-	cout << "Time cost: " << CalculateTime(start, stop) << "second" << endl;
 }
 void ExecfileLinetoQuery(string line)
 {

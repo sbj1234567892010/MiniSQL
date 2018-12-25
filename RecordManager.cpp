@@ -15,22 +15,6 @@ struct FileStatus {
 //块状态 
 map <string, map <int, int> >  blockStatus;
 
-class blockStatusSaver {
-public:
-	~blockStatusSaver() {
-		for (map <string, map<int, int> >::iterator it = blockStatus.begin(); it != blockStatus.end(); it++) {
-			string fileName = it->first;
-			FILE *fp = fopen((fileName + ".blockinfo").c_str(), "w");
-			assert(fp);
-			for (map<int, int>::iterator i = blockStatus[fileName].begin(); i != blockStatus[fileName].end(); i++) {
-				fprintf(fp, "%d %d\n", i->first, i->second);
-			}
-			fclose(fp);
-		}
-	}
-}bss;
-
-
 
 //类型检测
 bool fitInTable(const vector<element> &entry, const table &datatable) {
@@ -40,11 +24,8 @@ bool fitInTable(const vector<element> &entry, const table &datatable) {
 
 	//依次检测属性类型是否匹配
 	for (int i = 0; i<entry.size(); i++) {
-		if (entry[i].type != datatable.items[i].type) {
-
+		if (entry[i].type != datatable.items[i].type)
 			return false;
-		}
-			
 	}
 	return true;
 }
@@ -109,20 +90,12 @@ vector <element> binaryToEntry(unsigned char *c, const table &datatable) {
 
 //读块状态
 void loadBlockStatus(const string &fileName) {
-	
-	//map <string, map <int, int> >::iterator  it;
-	//it = find(blockStatus.begin(), blockStatus.end(), fileName);
-	//if (it == blockStatus.end())goto newone;//没有块，需要新建
-	//找到了改名字，块还没满，返回，但是没有考虑没有块的情况
-	//int flag = blockStatus.count(fileName);
-
+	//块还没满，返回
 	if (blockStatus.find(fileName) != blockStatus.end())
 		return;
 
-	/*newone:*/
 	//块满了，开新块
 	FILE *fplist = fopen((fileName + ".blockinfo").c_str(), "r");//////////////////
-
 	if (fplist) {
 		int offset, occ;
 		while (fscanf(fplist, "%d%d", &offset, &occ) != EOF) {
@@ -150,7 +123,7 @@ int rmInsertRecord(const string &fileName, const vector<element> &entry, const t
 			break;
 		}
 	}
-	
+
 	Block block;
 	if (offset == -1) {
 
@@ -203,17 +176,6 @@ void rmDeleteWithoutIndex(const string fileName, const Fitter &fitter, const tab
 
 				//符合删除条件
 				if (fitter.test(datatable,entry)) {
-					for (int j = 0; j<datatable.items.size(); j++) {
-						if (datatable.items[j].indices.size()) {
-							string tablename = datatable.name;
-							while (*(tablename.end() - 1) != '.')
-								tablename.erase(tablename.end() - 1);
-							tablename.erase(tablename.end() - 1);
-							string btreename = tablename + "." + datatable.items[j].name + ".index";
-							assert(btFind(btreename, entry[j]) != -1);
-							btDelete(btreename, entry[j]);
-						}
-					}
 
 					block.data[i] = false;
 					blockStatus[fileName][offset]--;
@@ -278,10 +240,7 @@ void rmAddIndex(const string dbName, const string BTreeName, const table &datata
 			if (block.data[i]) {
 				vector <element> entry = binaryToEntry(c, datatable);
 				assert(itemIndex<entry.size());
-				if (btFind(BTreeName, entry[itemIndex]) != -1)
-				{
-					assert(false);
-				}
+				assert(btFind(BTreeName, entry[itemIndex]) !=-1);
 				btInsert(BTreeName, entry[itemIndex], offset);
 			}
 			c += datatable.entrySize;

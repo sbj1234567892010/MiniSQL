@@ -284,9 +284,6 @@ int BPHeader::DeleteKey(const char* key)
 std::set<unsigned int> BPHeader::FindLessThan(const int key)
 {
 	std::set<unsigned int> resSet = std::set<unsigned int>();
-	if (!this->rootOffset || !this->IsInt())
-		return resSet;
-
 	Block b = bmReadBlock(this->indexName, this->rootOffset);
 	BPIntNode *node = new BPIntNode(b);
 	while (!node->isLeaf())
@@ -319,10 +316,6 @@ std::set<unsigned int> BPHeader::FindLessThan(const int key)
 std::set<unsigned int> BPHeader::FindLessThan(const float key)
 {
 	std::set<unsigned int> resSet = std::set<unsigned int>();
-	if (!this->rootOffset || !this->IsFloat())
-		return resSet;
-
-
 	Block b = bmReadBlock(this->indexName, this->rootOffset);
 	BPFloatNode *node = new BPFloatNode(b);
 	while (!node->isLeaf())
@@ -343,8 +336,8 @@ std::set<unsigned int> BPHeader::FindLessThan(const float key)
 			unsigned int nextOffset = node->childOffset[ri];
 			delete node;
 			if (!nextOffset) break;	//search ends;
-
-			node = new BPFloatNode(bmReadBlock(this->indexName, nextOffset));
+			Block ReadBlock2 = bmReadBlock(this->indexName, nextOffset);
+			node = new BPFloatNode(ReadBlock2);
 			ri = 0;
 		}
 		k = node->keys[ri];
@@ -357,10 +350,6 @@ std::set<unsigned int> BPHeader::FindLessThan(const char* key)
 {
 	unsigned int length = this->type >> 1;
 	std::set<unsigned int> resSet = std::set<unsigned int>();
-	if (!this->rootOffset || !this->IsStr())
-		return resSet;
-
-
 	Block b = bmReadBlock(this->indexName, this->rootOffset);
 	BPStrNode *node = new BPStrNode(b);
 	while (!node->isLeaf())
@@ -382,8 +371,8 @@ std::set<unsigned int> BPHeader::FindLessThan(const char* key)
 			unsigned int nextOffset = node->childOffset[ri];
 			delete node;
 			if (!nextOffset) break;	//search ends;
-
-			node = new BPStrNode(bmReadBlock(this->indexName, nextOffset));
+			Block ReadBlock1 = bmReadBlock(this->indexName, nextOffset);
+			node = new BPStrNode(ReadBlock1);
 			ri = 0;
 		}
 		//memcpy(k, node->keys[ri], length);
@@ -394,10 +383,6 @@ std::set<unsigned int> BPHeader::FindLessThan(const char* key)
 std::set<unsigned int> BPHeader::FindMoreThan(const int key)
 {
 	std::set<unsigned int> resSet = std::set<unsigned int>();
-	if (!this->rootOffset || !this->IsInt())
-		return resSet;
-
-
 	Block b = bmReadBlock(this->indexName, this->rootOffset);
 	BPIntNode *node = new BPIntNode(b);
 	while (!node->isLeaf())
@@ -426,9 +411,7 @@ std::set<unsigned int> BPHeader::FindMoreThan(const int key)
 	int ri = begin;
 	while (1)
 	{
-		if(node->keys[ri] > key)
-			resSet.insert(node->childOffset[ri]);
-		ri++;
+		resSet.insert(node->childOffset[ri++]);
 		if (ri == node->fanOut - 1)
 		{
 			unsigned int nextOffset = node->childOffset[ri];
@@ -449,10 +432,6 @@ std::set<unsigned int> BPHeader::FindMoreThan(const int key)
 std::set<unsigned int> BPHeader::FindMoreThan(const float key)
 {
 	std::set<unsigned int> resSet = std::set<unsigned int>();
-	if (!this->rootOffset || !this->IsFloat())
-		return resSet;
-
-
 	Block b = bmReadBlock(this->indexName, this->rootOffset);
 	BPFloatNode *node = new BPFloatNode(b);
 	while (!node->isLeaf())
@@ -481,9 +460,7 @@ std::set<unsigned int> BPHeader::FindMoreThan(const float key)
 	int ri = begin;
 	while (1)
 	{
-		if (node->keys[ri] > key)
-			resSet.insert(node->childOffset[ri]);
-		ri++;
+		resSet.insert(node->childOffset[ri++]);
 		if (ri == node->fanOut - 1)
 		{
 			unsigned int nextOffset = node->childOffset[ri];
@@ -505,10 +482,6 @@ std::set<unsigned int> BPHeader::FindMoreThan(const char * key)
 {
 	unsigned int length = this->type >> 1;
 	std::set<unsigned int> resSet = std::set<unsigned int>();
-	if (!this->rootOffset || !this->IsStr())
-		return resSet;
-
-
 	Block b = bmReadBlock(this->indexName, this->rootOffset);
 	BPStrNode *node = new BPStrNode(b);
 	while (!node->isLeaf())
@@ -538,9 +511,7 @@ std::set<unsigned int> BPHeader::FindMoreThan(const char * key)
 	int ri = begin;
 	while (1)
 	{
-		if (strncmp(node->keys[ri], key, length) > 0)
-			resSet.insert(node->childOffset[ri]);
-		ri++;
+		resSet.insert(node->childOffset[ri++]);
 		if (ri == node->fanOut - 1)
 		{
 			unsigned int nextOffset = node->childOffset[ri];
@@ -614,11 +585,6 @@ int btDelete(const string &fileName, const element &key) {
 		return h.DeleteKey(key.datas.c_str());
 	}
 	return false;
-}
-
-void btDrop(const string & fileName)
-{
-	bmClear(fileName);
 }
 
 std::set <unsigned int> btFindLess(const string &fileName, const element &key) {

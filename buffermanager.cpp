@@ -23,60 +23,31 @@ struct Buffer {
 	unsigned char data[BlockSize];
 };
 
-//static FileStatus open(const string &fileName) {
-//	/*if (dict.find(fileName)!=dict.end()) 
-//		return dict[fileName];*/
-//	FileStatus ret;
-//	FILE *fplist=fopen((fileName+".freelist").c_str(),"r");
-//	if (fplist && dict.find(fileName) == dict.end()) {
-//		int o;
-//		while (fscanf(fplist,"%d",&o)!=EOF) {
-//			freelist[fileName].push_back(o);
-//		}
-//		fclose(fplist);
-//	}
-//
-//	if ( (ret.fp = fopen(fileName.c_str(),"rb+")) ==0 ) {
-//		ret.fp=fopen(fileName.c_str(),"w");
-//		fclose(ret.fp);
-//		ret.fp=fopen(fileName.c_str(),"rb+");		
-//		ret.fileSize=0;
-//
-//	} else {
-//		fseek(ret.fp,0,SEEK_END);
-//		ret.fileSize=ftell(ret.fp);
-//	}
-//	assert(ret.fp);
-//	dict[fileName]=ret;		
-//	return ret;
-//}
-
 static FileStatus open(const string &fileName) {
-	if (dict.find(fileName)!=dict.end())
-		return dict[fileName];
+	/*if (dict.find(fileName)!=dict.end()) 
+		return dict[fileName];*/
 	FileStatus ret;
-	FILE *fplist = fopen((fileName + ".freelist").c_str(), "r");
-	if (fplist) {
+	FILE *fplist=fopen((fileName+".freelist").c_str(),"r");
+	if (fplist && dict.find(fileName) == dict.end()) {
 		int o;
-		while (fscanf(fplist, "%d", &o) != EOF) {
+		while (fscanf(fplist,"%d",&o)!=EOF) {
 			freelist[fileName].push_back(o);
 		}
 		fclose(fplist);
 	}
 
-	if ((ret.fp = fopen(fileName.c_str(), "rb+")) == 0) {
-		ret.fp = fopen(fileName.c_str(), "w");
+	if ( (ret.fp = fopen(fileName.c_str(),"rb+")) ==0 ) {
+		ret.fp=fopen(fileName.c_str(),"w");
 		fclose(ret.fp);
-		ret.fp = fopen(fileName.c_str(), "rb+");
-		ret.fileSize = 0;
+		ret.fp=fopen(fileName.c_str(),"rb+");		
+		ret.fileSize=0;
 
-	}
-	else {
-		fseek(ret.fp, 0, SEEK_END);
-		ret.fileSize = ftell(ret.fp);
+	} else {
+		fseek(ret.fp,0,SEEK_END);
+		ret.fileSize=ftell(ret.fp);
 	}
 	assert(ret.fp);
-	dict[fileName] = ret;
+	dict[fileName]=ret;		
 	return ret;
 }
 

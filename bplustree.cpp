@@ -20,7 +20,7 @@ BPNode::BPNode(Block &b):indexName(b.fileName)
     if(eleType == INT) eleSize = sizeof(int);
     else if(eleType == FLOAT) eleSize = sizeof(float);
     else eleSize = (eleType >> 1);
-    
+
     N = (BlockSize - offset*sizeof(unsigned char) - sizeof(*childOffset)) / (sizeof(*childOffset) + eleSize) + 1;
     childOffset = new unsigned int [N];
     for(unsigned int i = 0; i < fanOut; i++)
@@ -48,10 +48,10 @@ BPNode::BPNode(unsigned int offset, NodeType head, const string& indexName):offs
         this->fanOut = 1;
         this->childOffset[0] = 0;
     }
-    else this->fanOut = 0;   
+    else this->fanOut = 0;
 }
 
-BPIntNode::BPIntNode(Block &b):BPNode(b)
+BPIntNode::BPIntNode(Block b):BPNode(b)
 {
 	assert(this->head >> 2 == INT);
     unsigned char* data = b.data;
@@ -67,7 +67,7 @@ BPIntNode::BPIntNode(Block &b):BPNode(b)
 BPIntNode::BPIntNode(unsigned int nodeOffset, NodeType head, const string& indexName):BPNode(nodeOffset, head, indexName)
 {
 	assert(this->head >> 2 == INT);
-    keys = new int[N - 1];  
+    keys = new int[N - 1];
 }
 
 BPFloatNode::BPFloatNode(Block &b):BPNode(b)
@@ -91,10 +91,7 @@ BPFloatNode::BPFloatNode(unsigned int nodeOffset, NodeType head, const string& i
 
 BPStrNode::BPStrNode(Block &b):BPNode(b)
 {
-	if (this->head >> 2 == INT || this->head >> 2 == FLOAT)
-	{
-		assert(false);
-	}
+	assert(this->head >> 2 != INT && this->head >> 2 != FLOAT);
     unsigned char* data = b.data;
     unsigned int offset = (sizeof(this->offset) + sizeof(head) + sizeof(fanOut)\
                           + N * sizeof(*childOffset) ) / sizeof(unsigned char);
@@ -186,7 +183,7 @@ void BPStrNode::WriteNode()
 
     unsigned int offset = 0;
     unsigned char* data = b.data;
-    unsigned int length = (head >> 3) / sizeof(char);
+    unsigned int length = (head >> 2) / sizeof(unsigned char);
 
     // memcpy(data + offset, &(this->offset), sizeof(this->offset));
     // offset += sizeof(this->offset) / sizeof(unsigned char);
@@ -340,7 +337,7 @@ bool BPIntNode::InsertKey(unsigned int offset, const int key)
     else
     {
         bool res;
-        BPIntNode *node = nullptr;
+        BPIntNode *node = NULL;
         unsigned int i;
 
         for(i = 0; i < this->fanOut - 1; i++)
@@ -375,7 +372,7 @@ bool BPIntNode::InsertKey(unsigned int offset, const int key)
                 this->fanOut++;
 
                 node->WriteNode();
-                newNode->WriteNode();              
+                newNode->WriteNode();
                 this->WriteNode();
 
                 delete newNode;
@@ -406,7 +403,7 @@ bool BPIntNode::InsertKey(unsigned int offset, const int key)
                 delete newNode;
             }
 
-            
+
         }
         delete node;
         return res;
@@ -444,7 +441,7 @@ bool BPFloatNode::InsertKey(unsigned int offset, const float key)
 	else
 	{
 		bool res;
-		BPFloatNode *node = nullptr;
+		BPFloatNode *node = NULL;
 		unsigned int i;
 
 		for (i = 0; i < this->fanOut - 1; i++)
@@ -548,7 +545,7 @@ bool BPStrNode::InsertKey(unsigned int offset, const char * key)
 	else
 	{
 		bool res;
-		BPStrNode *node = nullptr;
+		BPStrNode *node = NULL;
 		unsigned int i;
 
 		for (i = 0; i < this->fanOut; i++)
@@ -655,10 +652,10 @@ int BPIntNode::DeleteKey(const int key)
 		Block b = bmReadBlock(this->indexName, this->childOffset[i]);
 		BPIntNode *child = new BPIntNode(b);
 		int retOffset = child->DeleteKey(key);
-		if (child->fanOut < N / 2)			
+		if (child->fanOut < N / 2)
 		{
-			BPIntNode *rChild = nullptr;	// Find an adjacent child node to merge or rearrange the values.
-			if (i < this->fanOut - 1) 
+			BPIntNode *rChild = NULL;	// Find an adjacent child node to merge or rearrange the values.
+			if (i < this->fanOut - 1)
 				rChild = new BPIntNode(bmReadBlock(this->indexName, this->childOffset[i + 1]));
 			else
 			{
@@ -704,7 +701,7 @@ int BPIntNode::DeleteKey(const int key)
 						{
 							rChild->childOffset[j - N / 2 + child->fanOut] = rChild->childOffset[j];
 							rChild->keys[j - N / 2 + child->fanOut] = rChild->keys[j];
-						}					
+						}
 						rChild->childOffset[rChild->fanOut + child->fanOut - N / 2 - 1] = rChild->childOffset[rChild->fanOut - 1];
 					}
 					else //child->fanOut > N / 2. SINCE child->fanOut + rChild->fanOur > N, it cannot happen that child->fanOut == N/2 and rChild->fanOut < N/2
@@ -742,14 +739,14 @@ int BPIntNode::DeleteKey(const int key)
 						if (j < rChild->fanOut - 1) child->keys[child->fanOut + j] = rChild->keys[j];
 					}
 					child->fanOut += rChild->fanOut;
-					
+
 					for (unsigned int j = i + 1; j < this->fanOut - 1; j++)
 					{
 						this->childOffset[j] = this->childOffset[j + 1];
 						this->keys[j - 1] = this->keys[j];
 					}
 					this->fanOut--;
-					
+
 					child->WriteNode();
 					this->WriteNode();
 					bmReleaseBlock(this->indexName, rChild->offset);
@@ -840,13 +837,15 @@ int BPFloatNode::DeleteKey(const float key)
 		int retOffset = child->DeleteKey(key);
 		if (child->fanOut < N / 2)
 		{
-			BPFloatNode *rChild = nullptr;	// Find an adjacent child node to merge or rearrange the values.
+			BPFloatNode *rChild = NULL;	// Find an adjacent child node to merge or rearrange the values.
+			Block ReadBlock1 = bmReadBlock(this->indexName, this->childOffset[i + 1]);
+			Block ReadBlock2 = bmReadBlock(this->indexName, this->childOffset[this->fanOut - 2]);
 			if (i < this->fanOut - 1)
-				rChild = new BPFloatNode(bmReadBlock(this->indexName, this->childOffset[i + 1]));
+				rChild = new BPFloatNode(ReadBlock1);
 			else
 			{
 				rChild = child;
-				child = new BPFloatNode(bmReadBlock(this->indexName, this->childOffset[this->fanOut - 2]));
+				child = new BPFloatNode(ReadBlock2);
 				i--;	//i = this->fanOut - 2
 			}		//rChild is always the right brother of 'child', and i always points at 'child'.
 
@@ -1026,13 +1025,15 @@ int BPStrNode::DeleteKey(const char* key)
 		int retOffset = child->DeleteKey(key);
 		if (child->fanOut < N / 2)
 		{
-			BPStrNode *rChild = nullptr;	// Find an adjacent child node to merge or rearrange the values.
+			BPStrNode *rChild = NULL;	// Find an adjacent child node to merge or rearrange the values.
+			Block ReadBlock1 = bmReadBlock(this->indexName, this->childOffset[i + 1]);
+			Block ReadBlock2 = bmReadBlock(this->indexName, this->childOffset[this->fanOut - 2]);
 			if (i < this->fanOut - 1)
-				rChild = new BPStrNode(bmReadBlock(this->indexName, this->childOffset[i + 1]));
+				rChild = new BPStrNode(ReadBlock1);
 			else
 			{
 				rChild = child;
-				child = new BPStrNode(bmReadBlock(this->indexName, this->childOffset[this->fanOut - 2]));
+				child = new BPStrNode(ReadBlock2);
 				i--;	//i = this->fanOut - 2
 			}		//rChild is always the right brother of 'child', and i always points at 'child'.
 

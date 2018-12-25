@@ -9,6 +9,67 @@
 #include "indexmanager.h"
 #include "bplustree.h"
 
+/*
+void CreateIndex(Index& index)
+{
+    if (!cmExistTable(index.table_name)) {
+		cout << "No such table" << endl;
+		return;
+	}
+
+}
+
+
+
+void DropIndex(const string indexName)
+{
+    if (!cmExistIndex(indexName)) {
+		cout << "No such index" << endl;
+		return;
+	}
+	if(cmDeleteIndex(indexName))
+    {
+        cout << "Index deleted." << endl;
+    }
+    else cout << "Deletion failed." << endl;
+}
+
+
+
+void CreateTable(table& table1, int pk)
+{
+	if (cmExistTable(table1.name)) {
+	    cout << "Table already exists." << endl;
+		return;
+	}
+	else {
+        cmCreateTable(table1,pk);
+        Index idx;
+        idx.index_name = table1.name+".PrimaryKeyDefault";
+        idx.table_name = table1.name;
+        idx.attr_name = table1.items[pk].name;
+        CreateIndex(idx);
+        //newtable.items[pk].unique=true;
+        //newtable.write();
+        return;
+	}
+}
+
+
+
+void DropTable(const string &tableName)
+{
+	if (!cmExistTable(tableName)) {
+	    cout << "Table does not exist." << endl;
+		return;
+	}
+	else {
+        cmDropTable(tableName);
+        cout << "Query OK. Table is dropped." << endl;
+        return;
+	}
+}
+*/
 
 
 void CreateIndex(Index& index)
@@ -25,7 +86,6 @@ void CreateIndex(Index& index)
 	for (int i = 0; i<nowtable.items.size(); i++) {
 		if (nowtable.items[i].name == index.attr_name) {
 			itemIndex = i;
-			break;
 		}
 	}
 
@@ -57,7 +117,7 @@ void CreateIndex(Index& index)
 
 
 
-void DropIndex(const string& indexName, const string& tableName)
+void DropIndex(const string indexName, const string tableName)
 {
    // cout << "DropIndex Succeed!" << endl;
 	if (!cmExistIndex(indexName, tableName)) {
@@ -75,8 +135,7 @@ void DropIndex(const string& indexName, const string& tableName)
 	//此处加表名
 	cmDeleteIndex(indexName, tableName);
 	if (nowtable.items[psi.second].indices.size() == 0)
-		//bmClear(psi.first + "." + nowtable.items[psi.second].name + ".index");
-		btDrop(psi.first + "." + nowtable.items[psi.second].name + ".index");
+		bmClear(psi.first + "." + nowtable.items[psi.second].name + ".index");
 	cout << "Drop Succeed!" << endl;
 	return ;
 }
@@ -116,7 +175,7 @@ void DropTable(const string &tableName)
 
 
 
-int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
+int Select(vector <string> SelectItem,const string &tableName, const Fitter &fitter)
 {
     //cout << "Select Succeed!" << endl;
 	if (!cmExistTable(tableName + ".table")) {
@@ -126,32 +185,6 @@ int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
 
 	//读表
 	const table nowtable = cmReadTable(tableName + ".table");
-	table printtable = cmReadTable(tableName + ".table");
-	int exi = 0;
-	vector<int>cutlist;
-
-	//更新要打印的表的属性信息
-	if (SelectItem[0] == "*");
-	else{
-		for (int i = 0; i < printtable.items.size(); i++) {
-
-			for (int j = 0; j<SelectItem.size(); j ++ ) {
-				if (printtable.items[i].name == SelectItem[j]) {
-					exi = 1; break;
-				}
-
-			}
-
-			if (exi == 0) {
-				printtable.items.erase(printtable.items.begin() + i);
-				i--;
-				cutlist.push_back(0);
-			}
-			else { cutlist.push_back(1); }
-			exi = 0;
-
-		}
-	}
 
 	string dbname = tableName + ".db";
 	string temp;
@@ -171,11 +204,6 @@ int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
 		}
 
 		if (nowtable.items[ind].type != rhs.type) {
-			if (nowtable.items[i].type == 1 && rhs.type == 0) {
-				fitter.rules[i].rhs.type = 1;
-				fitter.rules[i].rhs.dataf = fitter.rules[i].rhs.datai;
-				continue;
-			}
 			cout << "Type mismatch!" << endl;
 			return 0;
 		}
@@ -183,8 +211,7 @@ int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
 
 	vector <vector <element> > ret;
 
-
-	 /*等于情况的查询*/
+	// 等于情况的查询
 	for (int i = 0; i<fitter.rules.size(); i++) {
 		if (fitter.rules[i].type == 2) {  // 等于情况的查询
 			element rhs = fitter.rules[i].rhs;
@@ -202,26 +229,9 @@ int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
 			if (nowtable.items[index].indices.size()) { // has index on it
 				string btreename = tableName + "." + nowtable.items[index].name + ".index";
 				int offset = btFind(btreename, rhs);
-				if (offset == -1)offset = 0;
 				//return rmSelectWithIndex(dbname, offset, fitter, nowtable);
-				ret = rmSelectWithIndex(dbname, offset, fitter, nowtable);
-
-				if (SelectItem[0] == "*");
-				else {
-					for (int i = 0; i < cutlist.size(); i++) {
-						if (cutlist[i] == 0) {
-							for (int j = 0; j < ret.size(); j++) {
-								ret[j].erase(ret[j].begin() + i);
-							}
-
-							cutlist.erase(cutlist.begin() + i);
-							i--;
-						}
-
-					}
-				}
-
-				DrawResult(printtable, ret);
+				vector <vector <element> > SelectItem = rmSelectWithIndex(dbname, offset, fitter, nowtable);
+				DrawResult( nowtable, SelectItem);
 				return 1;
 			}
 		}
@@ -229,23 +239,9 @@ int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
 
 	//全部查询
 	if (fitter.rules.size() == 0) {
-
-		ret = rmSelectWithoutIndex(dbname, fitter, nowtable);
-		if (SelectItem[0] == "*");
-		else {
-			for (int i = 0; i < cutlist.size(); i++) {
-				if (cutlist[i] == 0) {
-					for (int j = 0; j < ret.size(); j++) {
-						ret[j].erase(ret[j].begin() + i);
-					}
-
-					cutlist.erase(cutlist.begin() + i);
-					i--;
-				}
-
-			}
-		}
-		DrawResult(printtable, ret);
+		//return rmSelectWithoutIndex(dbname, fitter, nowtable);
+		vector <vector <element> > SelectItem = rmSelectWithoutIndex(dbname, fitter, nowtable);
+		DrawResult(nowtable, SelectItem);
 		return 1;
 	}
 
@@ -253,7 +249,7 @@ int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
 
 	for (int i = 0; i<fitter.rules.size(); i++) {
 		Rule rule = fitter.rules[i];
-		if (rule.type == 5) continue;
+
 		temp = fitter.rules[i].itemname;
 		for (int i = 0; i<nowtable.items.size(); i++) {
 			if (nowtable.items[i].name == temp) {
@@ -262,7 +258,7 @@ int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
 			}
 		}
 
-		int elementIndex = ind ;
+		int elementIndex = ind;
 		if (!nowtable.items[elementIndex].indices.size())
 			continue;
 		element rhs = rule.rhs;
@@ -292,22 +288,9 @@ int Select(vector <string> SelectItem,const string &tableName, Fitter &fitter)
 			res.push_back(tmp[i]);
 		}
 	}
-	if (SelectItem[0] == "*");
-	else {
-		for (int i = 0; i < cutlist.size(); i++) {
-			if (cutlist[i] == 0) {
-				for (int j = 0; j < res.size(); j++) {
-					res[j].erase(res[j].begin() + i);
-				}
 
-				cutlist.erase(cutlist.begin() + i);
-				i--;
-			}
-
-		}
-	}
 	//return Response(res);
-	DrawResult(printtable, res);
+	DrawResult(nowtable, res);
 	return 1;
 }
 
@@ -370,7 +353,7 @@ vector <vector <element> >  Select_Test(const string &tableName, const Fitter &f
 }
 
 
-void Delete(const string &tableName, Fitter &fitter)
+void Delete(const string &tableName, const Fitter &fitter)
 {
     //cout << "Delete Succeed!" << endl;
 	if (!cmExistTable(tableName + ".table")) {
@@ -398,11 +381,6 @@ void Delete(const string &tableName, Fitter &fitter)
 		}
 
 		if (nowtable.items[ind].type != rhs.type) {
-			if (nowtable.items[i].type == 1 && rhs.type == 0) {
-				fitter.rules[i].rhs.type = 1;
-				fitter.rules[i].rhs.dataf = fitter.rules[i].rhs.datai;
-				continue;
-			}
 			cout << "Type mismatch!" << endl;
 			return;
 		}
@@ -424,9 +402,7 @@ void Delete(const string &tableName, Fitter &fitter)
 			if (nowtable.items[index].indices.size()) { // has index on it
 				string btreename = tableName + "." + nowtable.items[index].name + ".index";
 				int offset = btFind(btreename, rhs);
-				if (offset == -1)offset = 0;
 				rmDeleteWithIndex(dbname, offset, fitter, nowtable);
-				cout << "Delete Succeed!" << endl;
 				return ;
 			}
 		}
@@ -435,14 +411,13 @@ void Delete(const string &tableName, Fitter &fitter)
 
 	if (fitter.rules.size() == 0) {
 		rmDeleteWithoutIndex(dbname, fitter, nowtable);
-		cout << "Delete Succeed!" << endl;
 		return ;
 	}
 
 	set<int> offset = rmGetAllOffsets(tableName + ".db");
 	for (int i = 0; i<fitter.rules.size(); i++) {
 		Rule rule = fitter.rules[i];
-		if (rule.type == 5)continue;
+
 		temp = fitter.rules[i].itemname;
 		for (int i = 0; i<nowtable.items.size(); i++) {
 			if (nowtable.items[i].name == temp) {
@@ -476,15 +451,13 @@ void Delete(const string &tableName, Fitter &fitter)
 	for (set <int>::iterator it = offset.begin(); it != offset.end(); it++) {
 		rmDeleteWithIndex(tableName + ".db", *it, fitter, nowtable);
 	}
-
-	cout << "Delete succeed!" << endl;
 	return ;
 
 }
 
 
 
-void Insert(const string& tableName, vector<element> entry)
+void Insert(const string tableName, const vector<element> entry)
 {
 	if (!cmExistTable(tableName + ".table")) {
 		cout << "No such table" << endl;
@@ -498,20 +471,14 @@ void Insert(const string& tableName, vector<element> entry)
 		return;
 	}
 
-	////锟斤拷时锟斤拷锟斤拷锟解，锟斤拷int锟斤拷锟斤拷float锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷为锟斤拷锟斤拷
-	for (unsigned int i = 0; i<nowtable.items.size(); i++) {
+	for (int i = 0; i<nowtable.items.size(); i++) {
 		if (nowtable.items[i].type != entry[i].type) {
-			if (nowtable.items[i].type == 1 && entry[i].type == 0) {
-				entry[i].type = 1;
-				entry[i].dataf = entry[i].datai;
-				continue;
-			}
 			cout << "Type mismatch" << endl;
 			return;
 		}
 	}
 
-	for ( unsigned int i = 0; i<nowtable.items.size(); i++) {
+	for (int i = 0; i<nowtable.items.size(); i++) {
 
 		//插入unique项目报错
 		if (nowtable.items[i].unique) {
@@ -524,20 +491,7 @@ void Insert(const string& tableName, vector<element> entry)
 			}
 		}
 	}
-
-	int res = rmInsertRecord(tableName + ".db", entry, nowtable);
-	if (res >= 0)
-	{
-		//table nowtable = cmReadTable(tableName + ".table");
-		for (unsigned int i = 0; i < nowtable.items.size(); i++)
-		{
-			if (nowtable.items[i].indices.size())
-			{
-				//table_name + "." + nowtable.items[itemIndex].name + ".index"
-				btInsert(tableName + "." + nowtable.items[i].name + ".index", entry[i], res);
-			}
-		}
-	}
+	rmInsertRecord(tableName + ".db", entry, nowtable);
 	cout << "Insert Succeed!" << endl;
 	return;
 }

@@ -36,7 +36,7 @@ public:
 
 		for (map <string, pair<string, int> >::iterator it = IndexToTable.begin(); it != IndexToTable.end(); it++) {
 
-			Iout << (it->first.substr(0,it->first.length()-1-it->second.first.length())) << " " << it->second.first << " " << it->second.second << endl;
+			Iout << it->first << " " << it->second.first << " " << it->second.second << endl;
 
 		}
 
@@ -122,7 +122,7 @@ void cmDropTable(const string &TableName) {
 		tableName.erase(tableName.end() - 1);
 	tableName.erase(tableName.end() - 1);
 
-	table DropTable = cmReadTable(TableName);
+	table DropTable = cmReadTable(tableName);
 	for (int i = 0; i<DropTable.items.size(); i++) {
 		bool flag = false;
 		for (set<string>::iterator it = DropTable.items[i].indices.begin(); it != DropTable.items[i].indices.end(); it++) {
