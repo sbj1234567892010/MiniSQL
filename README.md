@@ -1,2 +1,2 @@
 # MiniSQL
-A mini SQL server
+A mini SQL server by C++
